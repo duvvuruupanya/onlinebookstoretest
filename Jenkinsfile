@@ -18,11 +18,16 @@ pipeline {
             }
         }
 
-     stage('Deploy to Tomcat') {
+    stage('Deploy to Tomcat') {
     steps {
+        echo "Deploying .war to Tomcat..."
+        
         sh 'scp -o StrictHostKeyChecking=no target/onlinebookstore.war deployer@192.168.11.221:/usr/share/tomcat/webapps/'
+        
+        sh 'ssh -o StrictHostKeyChecking=no deployer@192.168.11.221 "sudo systemctl restart tomcat"'
     }
 }
+
 
 
     }
