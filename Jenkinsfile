@@ -20,7 +20,7 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                sshagent(['deploy-ssh']) {
+                {
                     sh '''
                         scp -o StrictHostKeyChecking=no target/*.war deployer@192.168.11.221:/home/deployer/
                         ssh deployer@192.168.11.221 '
