@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'
+        maven 'Maven'
     }
 
     stages {
@@ -20,15 +20,10 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                {
-                    sh '''
-                        scp -o StrictHostKeyChecking=no target/*.war deployer@192.168.11.221:/home/deployer/
-                        ssh deployer@192.168.11.221 '
-                            sudo mv /home/deployer/*.war /usr/share/tomcat/webapps/ &&
-                            sudo systemctl restart tomcat
-                        '
-                    '''
-                }
+                sh '''
+                  scp -o StrictHostKeyChecking=no target/onlinebookstore.war deployer@192.168.11.221:/usr/share/tomcat/webapps/
+                  ssh -o StrictHostKeyChecking=no deployer@192.168.11.221 "sudo systemctl restart tomcat"
+                '''
             }
         }
     }
