@@ -6,36 +6,30 @@ pipeline {
     }
 
     stages {
-        stage('Checkout from GitHub') {
+        stage('Clone Code') {
             steps {
-                git branch: 'master',
-                    url: 'https://github.com/duvvuruupanya/onlinebookstoretest.git'
+                git branch: 'main', url: 'https://github.com/duvvuruupanya/onlinebookstoretest.git'
             }
         }
 
-        stage('Build with Maven') {
+        stage('Build WAR') {
             steps {
-                sh 'mvn -B clean package'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
-                sshagent(['tomcat-ssh']) {
+                sshagent(['deploy-ssh']) {
                     sh '''
-                        scp -o StrictHostKeyChecking=no target/onlinebookstore.war deployer@192.168.11.221:/usr/share/tomcat/webapps/
+                        scp -o StrictHostKeyChecking=no target/*.war deployer@192.168.11.221:/home/deployer/
+                        ssh deployer@192.168.11.221 '
+                            sudo mv /home/deployer/*.war /usr/share/tomcat/webapps/ &&
+                            sudo systemctl restart tomcat
+                        '
                     '''
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo "✅ Deployment successful!"
-        }
-        failure {
-            echo "❌ Deployment failed. Check Jenkins console log."
         }
     }
 }
