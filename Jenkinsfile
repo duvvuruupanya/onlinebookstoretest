@@ -1,47 +1,41 @@
 pipeline {
-  agent any
+    agent any
 
-  tools {
-    maven 'Maven3'
-  }
-
-  environment {
-    TOMCAT_HOST = "192.168.56.102"   // 🔹 Replace with Tomcat VM IP
-    APP_NAME    = "onlinebookstore"  // 🔹 WAR name without .war
-  }
-
-  stages {
-    stage('Checkout from GitHub') {
-      steps {
-        checkout scm
-      }
+    tools {
+        maven 'Maven3'
     }
 
-    stage('Build with Maven') {
-      steps {
-        sh 'mvn -B clean package'
-        archiveArtifacts artifacts: 'target/*.war', fingerprint: true
-      }
-    }
-
-    stage('Deploy to Tomcat') {
-      steps {
-        sshagent (credentials: ['tomcat-ssh']) {
-          sh """
-            echo "➡️ Deploying WAR to Tomcat..."
-            scp -o StrictHostKeyChecking=no target/*.war deployer@${TOMCAT_HOST}:/opt/tomcat/webapps/${APP_NAME}.war
-          """
+    stages {
+        stage('Checkout from GitHub') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/duvvuruupanya/onlinebookstoretest.git'
+            }
         }
-      }
-    }
-  }
 
-  post {
-    success {
-      echo "✅ Application deployed successfully at http://${TOMCAT_HOST}:8080/${APP_NAME}/"
+        stage('Build with Maven') {
+            steps {
+                sh 'mvn -B clean package'
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                sshagent(['tomcat-ssh']) {
+                    sh '''
+                        scp -o StrictHostKeyChecking=no target/onlinebookstore.war deployer@192.168.11.221:/usr/share/tomcat/webapps/
+                    '''
+                }
+            }
+        }
     }
-    failure {
-      echo "❌ Deployment failed. Check Jenkins console log."
+
+    post {
+        success {
+            echo "✅ Deployment successful!"
+        }
+        failure {
+            echo "❌ Deployment failed. Check Jenkins console log."
+        }
     }
-  }
 }
