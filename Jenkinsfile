@@ -12,7 +12,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // always pull latest from GitHub
-                git branch: 'main', url: 'https://github.com/duvvuruupanya/onlinebookstoretest.git'
+                git branch: 'master', url: 'https://github.com/duvvuruupanya/onlinebookstoretest.git'
             }
         }
 
